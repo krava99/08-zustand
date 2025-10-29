@@ -14,7 +14,7 @@ export async function generateMetadata({
 }: {
   params: Params;
 }): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   const filterSlug = slug?.[0] || "all";
 
   return {
@@ -41,7 +41,7 @@ export default async function FilteredNotesPage({
 }: {
   params: Params;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
   const filterSlug = slug?.[0] || "all";
   const tagToFetch = filterSlug === "all" ? undefined : filterSlug;
 
@@ -61,7 +61,7 @@ export default async function FilteredNotesPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NotesClient initialTag={filterSlug} initialParams={fetchParams} />
+      <NotesClient tag={(tagToFetch ?? "all") as "all"} />
     </HydrationBoundary>
   );
 }

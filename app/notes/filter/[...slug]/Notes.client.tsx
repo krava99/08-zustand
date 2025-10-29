@@ -4,12 +4,13 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchNotes, type FetchNotesResponse } from "@/lib/api";
 import { NoteList } from "../../../../components/NoteList/NoteList";
 import { Pagination } from "../../../../components/Pagination/Pagination";
-import { Modal } from "../../../../components/Modal/Modal";
-import { NoteForm } from "../../../../components/NoteForm/NoteForm";
 import { SearchBox } from "../../../../components/SearchBox/SearchBox";
 import { useDebounce } from "use-debounce";
 import css from "./Notes.page.module.css";
 import { NoteTag } from "@/types/note";
+import Link from "next/link";
+import Loading from "@/app/loading";
+import ErrorDisplay from "@/app/error";
 
 interface Props {
   tag: NoteTag | "all";
@@ -20,12 +21,7 @@ export const NotesClient = ({ tag }: Props) => {
   const [page, setPage] = useState<number>(1);
   const [debouncedSearch] = useDebounce(search, 300);
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
-
-  const { data, isLoading, isError, isFetching } = useQuery<
+  const { data, isLoading, isError, isFetching, error } = useQuery<
     FetchNotesResponse,
     Error
   >({
@@ -41,37 +37,47 @@ export const NotesClient = ({ tag }: Props) => {
     refetchOnMount: false,
   });
 
-  if (isLoading) return <Loader />;
-  if (isError) return <p>Error loading notes</p>;
+  const handleSearchChange = (value: string): void => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number): void => {
+    setPage(newPage);
+  };
 
   const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 1;
+
+  if (isError) {
+    return <ErrorDisplay error={error!} />;
+  }
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox value={search} onChange={handleSearchChange} />
+
         {totalPages > 1 && (
           <Pagination
             page={page}
             totalPages={totalPages}
-            onPageChange={setPage}
+            onPageChange={handlePageChange}
           />
         )}
-        <button
+
+        <Link
+          href="/notes/action/create"
           className={css.button}
-          onClick={openModal}
-          disabled={isFetching}
+          aria-disabled={isFetching}
         >
           Create note +
-        </button>
+        </Link>
       </header>
-      {notes.length ? <NoteList notes={notes} /> : <p>No notes found</p>}
-      {isModalOpen && (
-        <Modal onClose={closeModal}>
-          <NoteForm onClose={closeModal} />
-        </Modal>
-      )}
+
+      {isFetching && !isLoading && <Loading />}
+
+      {notes.length > 0 ? <NoteList notes={notes} /> : <p>No notes found</p>}
     </div>
   );
 };
