@@ -40,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable} ${roboto.variable}`}>
+      <body className={`${roboto.variable}`}>
         <QueryProvider>
           <Header />
           {children}

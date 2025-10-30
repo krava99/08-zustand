@@ -9,21 +9,32 @@ import { Metadata } from "next";
 
 type Params = { slug: string[] };
 
+const formTag = (tag: string) => {
+  if (tag === "all") {
+    return "All Notes";
+  }
+};
+
 export async function generateMetadata({
   params,
 }: {
-  params: Params;
+  params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const filterSlug = slug?.[0] || "all";
 
+  const formatTag = formTag(filterSlug);
+  const titleTag = `${formatTag} | Note`;
+  const descriptionTag = `Notes filtered by tag: ${formatTag}`;
+
   return {
-    title: "Notes",
-    description: "Notes filter",
+    title: titleTag,
+    description: descriptionTag,
     openGraph: {
-      title: "Notes selection",
+      title: `${formatTag} selection`,
       description: `Notes filter by ${filterSlug}`,
-      url: `app/notes/filter/${filterSlug}`,
+      url: `https://08-zustand-six-blue.vercel.app/notes/filter/${filterSlug}`,
+
       images: [
         {
           url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg",
