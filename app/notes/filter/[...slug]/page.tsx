@@ -13,6 +13,13 @@ const formTag = (tag: string) => {
   if (tag === "all") {
     return "All Notes";
   }
+
+  const formattedTag = tag
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+  return formattedTag;
 };
 
 export async function generateMetadata({
@@ -32,7 +39,7 @@ export async function generateMetadata({
     description: descriptionTag,
     openGraph: {
       title: `${formatTag} selection`,
-      description: `Notes filter by ${filterSlug}`,
+      description: `Notes filter by ${formatTag}`,
       url: `https://08-zustand-six-blue.vercel.app/notes/filter/${filterSlug}`,
 
       images: [
